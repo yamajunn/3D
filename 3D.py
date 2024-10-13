@@ -19,11 +19,12 @@ def generate_cube_vertices(point_3d, size=1):
 def projection_3d_to_2d(point_3d, camera_position, screen_width, screen_height, fov, near_plane):
     relative_position = point_3d - camera_position
     X, Y, Z = relative_position
-    # near_plane より手前にある場合は処理しない
-    if Z <= near_plane:
+
+    # near_plane より手前、またはZが0に近い場合は処理しない
+    if Z <= near_plane or np.isclose(Z, 0):
         return None, None  # 描画しない
 
-    aspect_ratio = screen_width / screen_height / 6  # 横長に調整
+    aspect_ratio = screen_width / screen_height / 6
     fov_rad = np.radians(fov) / 2
     scale_x = 1 / np.tan(fov_rad)
     scale_y = scale_x / aspect_ratio
@@ -75,17 +76,17 @@ edges = [
 ]
 
 fov = 90
-near_plane = 1
+near_plane = -30
 camera_position = np.array([1.5, 1.5, 5], dtype=float)
 
 screen_width = 1700  # 横長にするために調整
 screen_height = 500
 
-starting_points = [np.array([1, 1, 1], dtype=float)]
-# for x in range(-7, 7):
-#     for y in range(1):
-#         for z in range(-20, 20):
-#             starting_points.append(np.array([x, y-0.5, z], dtype=float))
+starting_points = []
+for x in range(-7, 7):
+    for y in range(1):
+        for z in range(2):
+            starting_points.append(np.array([x, y+2, z], dtype=float))
 
 def get_char_by_distance(distance):
     if distance < 3:
@@ -146,5 +147,5 @@ while True:
 
     time.sleep(0.1)
     camera_position[2] += 0.1
-    if camera_position[2] > 10:
+    if camera_position[2] > 100:
         camera_position[2] = 5
