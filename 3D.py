@@ -23,7 +23,7 @@ def projection_3d_to_2d(point_3d, camera_position, screen_width, screen_height, 
     if Z <= near_plane:
         return None, None  # 描画しない
 
-    aspect_ratio = screen_width / screen_height
+    aspect_ratio = screen_width / screen_height / 6  # 横長に調整
     fov_rad = np.radians(fov) / 2
     scale_x = 1 / np.tan(fov_rad)
     scale_y = scale_x / aspect_ratio
@@ -63,7 +63,6 @@ def bresenham_with_distances(x0, y0, z0, x1, y1, z1):
 
 # 画面外の座標を画面内に収めるクリッピング関数
 def clip_to_screen(x, y, screen_width, screen_height):
-    # 画面外に出た点を画面の境界にクリッピングする
     x = max(0, min(x, screen_width - 1))
     y = max(0, min(y, screen_height - 1))
     return x, y
@@ -79,14 +78,14 @@ fov = 90
 near_plane = 1
 camera_position = np.array([1.5, 1.5, 5], dtype=float)
 
-screen_width = 700
+screen_width = 1700  # 横長にするために調整
 screen_height = 500
 
-starting_points = []
-for x in range(-7, 7):
-    for y in range(1):
-        for z in range(-20, 20):
-            starting_points.append(np.array([x, y-0.5, z], dtype=float))
+starting_points = [np.array([1, 1, 1], dtype=float)]
+# for x in range(-7, 7):
+#     for y in range(1):
+#         for z in range(-20, 20):
+#             starting_points.append(np.array([x, y-0.5, z], dtype=float))
 
 def get_char_by_distance(distance):
     if distance < 3:
