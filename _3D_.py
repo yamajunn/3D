@@ -1,10 +1,10 @@
 import numpy as np
 
 # カメラパラメータ
-camera_position = np.array([0, 0, 10])
-camera_target = np.array([0, 0, 0])  # カメラが向いている方向
-camera_up = np.array([0, 0, 0])  # カメラの上方向
-fov = np.radians(120)  # 視野角をラジアンに変換
+camera_position = np.array([0, 0, 5])
+camera_target = np.array([3, 0, 0])  # カメラが向いている方向
+camera_up = np.array([0, 1, 0])  # カメラの上方向
+fov = np.radians(160)  # 視野角をラジアンに変換
 aspect_ratio = 16 / 9  # アスペクト比
 near_plane = 0.1
 far_plane = 1000.0
@@ -15,7 +15,8 @@ screen_height = 200  # ターミナルの縦幅
 
 # 立方体の中心位置とサイズ（複数の立方体）
 boxes = [
-    {'center': np.array([0, -1, 0]), 'half_size': 0.5},
+    {'center': np.array([0, 0, 0]), 'half_size': 0.5},
+    {'center': np.array([1, 1, 1]), 'half_size': 0.5},
 ]
 
 # 透視投影行列の計算
