@@ -1,24 +1,5 @@
 import numpy as np
 
-# カメラパラメータ
-camera_position = np.array([0, 0, 5])
-camera_target = np.array([3, 0, 0])  # カメラが向いている方向
-camera_up = np.array([0, 1, 0])  # カメラの上方向
-fov = np.radians(160)  # 視野角をラジアンに変換
-aspect_ratio = 16 / 9  # アスペクト比
-near_plane = 0.1
-far_plane = 1000.0
-
-# スクリーンのサイズ
-screen_width = 1500  # ターミナルの横幅
-screen_height = 200  # ターミナルの縦幅
-
-# 立方体の中心位置とサイズ（複数の立方体）
-boxes = [
-    {'center': np.array([0, 0, 0]), 'half_size': 0.5},
-    {'center': np.array([1, 1, 1]), 'half_size': 0.5},
-]
-
 # 透視投影行列の計算
 def perspective_projection(fov, aspect_ratio, near_plane, far_plane):
     f = 1 / np.tan(fov / 2)
@@ -159,13 +140,97 @@ def render_to_terminal_with_culling(boxes, screen_width, screen_height, camera_p
     
     return terminal_screen
 
-# 透視投影行列とビュー行列を取得
-projection_matrix = perspective_projection(fov, aspect_ratio, near_plane, far_plane)
-view_matrix = look_at(camera_position, camera_target, camera_up)
+class Color:
+	BLACK          = '\033[30m'#(文字)黒
+	RED            = '\033[31m'#(文字)赤
+	GREEN          = '\033[32m'#(文字)緑
+	YELLOW         = '\033[33m'#(文字)黄
+	BLUE           = '\033[34m'#(文字)青
+	MAGENTA        = '\033[35m'#(文字)マゼンタ
+	CYAN           = '\033[36m'#(文字)シアン
+	WHITE          = '\033[37m'#(文字)白
+	COLOR_DEFAULT  = '\033[39m'#文字色をデフォルトに戻す
+	BOLD           = '\033[1m'#太字
+	UNDERLINE      = '\033[4m'#下線
+	INVISIBLE      = '\033[08m'#不可視
+	REVERCE        = '\033[07m'#文字色と背景色を反転
+	BG_BLACK       = '\033[40m'#(背景)黒
+	BG_RED         = '\033[41m'#(背景)赤
+	BG_GREEN       = '\033[42m'#(背景)緑
+	BG_YELLOW      = '\033[43m'#(背景)黄
+	BG_BLUE        = '\033[44m'#(背景)青
+	BG_MAGENTA     = '\033[45m'#(背景)マゼンタ
+	BG_CYAN        = '\033[46m'#(背景)シアン
+	BG_WHITE       = '\033[47m'#(背景)白
+	BG_DEFAULT     = '\033[49m'#背景色をデフォルトに戻す
+	RESET          = '\033[0m'#全てリセット
+    
+# カメラパラメータ
+camera_position = np.array([0, 0, 0])
+camera_target = np.array([0, 0, 0])  # カメラが向いている方向
+camera_up = np.array([0, 1, 0])  # カメラの上方向
+fov = np.radians(90)  # 視野角をラジアンに変換
+aspect_ratio = 16 / 9  # アスペクト比
+near_plane = 0.1
+far_plane = 1000.0
 
-# ターミナルに立体を表示
-terminal_screen = render_to_terminal_with_culling(boxes, screen_width, screen_height, camera_position, projection_matrix, view_matrix)
+# スクリーンのサイズ
+screen_width = 1400  # ターミナルの横幅
+screen_height = 400  # ターミナルの縦幅
 
-# ターミナルに表示
-for row in terminal_screen:
-    print("".join(row))
+# 立方体の中心位置とサイズ（複数の立方体）
+boxes = [
+    {'center': np.array([0, 0, 0]), 'half_size': 0.5},
+]
+
+y_counter = 0
+y_counter_bool = True
+
+rotate_angle = 0
+rotate_angle_bool = True
+
+color_count = 31
+while True:
+    boxes = [
+        {'center': np.array([0, y_counter, 0]), 'half_size': 0.5},
+        {'center': np.array([0, y_counter, 1]), 'half_size': 0.5},
+        {'center': np.array([1, y_counter, 0]), 'half_size': 0.5},
+        {'center': np.array([1, y_counter, 1]), 'half_size': 0.5}
+        ]
+    for x in range(-2, 2):
+        for y in range(-2, 2):
+            for z in range(-2, 2):
+                boxes.append({'center': np.array([x, y_counter+y, z]), 'half_size': 0.5})
+    camera_target = np.array([rotate_angle, 0, 0])
+    camera_position = np.array([-rotate_angle*2, 0, 5])
+    # 透視投影行列とビュー行列を取得
+    projection_matrix = perspective_projection(fov, aspect_ratio, near_plane, far_plane)
+    view_matrix = look_at(camera_position, camera_target, camera_up)
+
+    # ターミナルに立体を表示
+    terminal_screen = render_to_terminal_with_culling(boxes, screen_width, screen_height, camera_position, projection_matrix, view_matrix)
+
+    # ターミナルに表示
+    for row in terminal_screen:
+        print(f"\033[{int(color_count)}m{''.join(row)}\033[0m")
+    print(f"\033[{screen_height + 1}A")  # ターミナルの行数分上に移動
+    if y_counter_bool:
+        if y_counter >= 0.2:
+            y_counter_bool = False
+        y_counter += 0.005
+    else:
+        if y_counter <= -0.2:
+            y_counter_bool = True
+        y_counter -= 0.005
+    
+    if rotate_angle_bool:
+        if rotate_angle >= 1:
+            rotate_angle_bool = False
+        rotate_angle += 0.01
+    else:
+        if rotate_angle <= -1:
+            rotate_angle_bool = True
+        rotate_angle -= 0.01
+    if color_count >= 39:
+        color_count = 31
+    color_count += 0.1
